@@ -185,6 +185,37 @@ class Ultimate_Envato_Elements_Updater {
 			return '';
 		}
 
-		return $data->body;
+		// Convert markdown to HTML.
+		$changelog = $data->body;
+
+		// Split content into sections.
+		$sections            = preg_split( '/\n(?=#)/', $changelog );
+		$formatted_changelog = '';
+
+		foreach ( $sections as $section ) {
+			// Convert headers.
+			$section = preg_replace( '/^#\s+(.*)$/m', '<h2>$1</h2>', $section );
+			$section = preg_replace( '/^##\s+(.*)$/m', '<h3>$1</h3>', $section );
+
+			// Convert lists.
+			$section = preg_replace( '/^\s*-\s+(.*)$/m', '<li>$1</li>', $section );
+			$section = preg_replace( '/(<li>.*<\/li>)/s', '<ul>$1</ul>', $section );
+
+			// Convert links.
+			$section = preg_replace( '/\[(.*?)\]\((.*?)\)/', '<a href="$2">$1</a>', $section );
+
+			// Remove markdown characters.
+			$section = str_replace( '**', '', $section );
+			$section = str_replace( '*', '', $section );
+			$section = str_replace( '`', '', $section );
+
+			// Add section to formatted changelog.
+			$formatted_changelog .= $section;
+		}
+
+		// Ensure proper HTML structure.
+		$formatted_changelog = '<div class="changelog">' . $formatted_changelog . '</div>';
+
+		return $formatted_changelog;
 	}
 }
