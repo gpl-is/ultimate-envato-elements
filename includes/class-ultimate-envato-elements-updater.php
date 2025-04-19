@@ -75,6 +75,9 @@ class Ultimate_Envato_Elements_Updater {
 		add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'check_for_updates' ) );
 		add_filter( 'plugins_api', array( $this, 'plugin_info' ), 20, 3 );
 		add_filter( 'upgrader_source_selection', array( $this, 'rename_github_folder' ), 10, 4 );
+
+		// Clear update info after plugin update is complete.
+		add_action( 'upgrader_process_complete', array( $this, 'clear_update_info' ), 10, 2 );
 	}
 
 	/**
@@ -141,9 +144,6 @@ class Ultimate_Envato_Elements_Updater {
 			$obj->url         = "https://github.com/{$this->owner}/{$this->repo}";
 			$obj->package     = "https://github.com/{$this->owner}/{$this->repo}/archive/refs/tags/{$remote_data['tag_name']}.zip";
 			$transient->response[ $this->plugin_basename ] = $obj;
-		} elseif ( isset( $transient->response[ $this->plugin_basename ] ) ) {
-			// If we're on the latest version, make sure to remove any existing update notice.
-			unset( $transient->response[ $this->plugin_basename ] );
 		}
 
 		return $transient;
@@ -276,5 +276,24 @@ class Ultimate_Envato_Elements_Updater {
 		$formatted_changelog = '<div class="changelog">' . $formatted_changelog . '</div>';
 
 		return $formatted_changelog;
+	}
+
+	/**
+	 * Clear update information from transient after update completion.
+	 *
+	 * @since    1.0.4
+	 * @param    object $upgrader_object The upgrader object.
+	 * @param    array  $options         The update options.
+	 */
+	public function clear_update_info( $upgrader_object, $options ) {
+		if ( 'update' === $options['action'] && 'plugin' === $options['type'] ) {
+			$update_plugins = get_site_transient( 'update_plugins' );
+
+			// Check if our plugin is in the update list and remove it from the response.
+			if ( isset( $update_plugins->response[ $this->plugin_basename ] ) ) {
+				unset( $update_plugins->response[ $this->plugin_basename ] );
+				set_site_transient( 'update_plugins', $update_plugins );
+			}
+		}
 	}
 }

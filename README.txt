@@ -4,7 +4,7 @@ Donate link: https://gpl.is/
 Tags: elementor, templates, envato, stock photos, design
 Requires at least: 6.0
 Tested up to: 6.8
-Stable tag: 1.0.3
+Stable tag: 1.0.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -46,6 +46,11 @@ The plugin is designed to work with Envato Elements 2.0.16 and higher. Future co
 
 == Changelog ==
 
+= 1.0.4 =
+* Added automatic cleanup of update information after successful updates
+* Improved update transient handling
+* Fixed potential duplicate update notifications
+
 = 1.0.3 =
 * Fixed issue where update notices would appear twice
 * Improved update checking mechanism
@@ -68,6 +73,9 @@ The plugin is designed to work with Envato Elements 2.0.16 and higher. Future co
 * Automatic configuration and setup
 
 == Upgrade Notice ==
+
+= 1.0.4 =
+Update includes improved update information handling and cleanup after successful updates.
 
 = 1.0.3 =
 Update includes fixes for update notification system and improved version checking.
