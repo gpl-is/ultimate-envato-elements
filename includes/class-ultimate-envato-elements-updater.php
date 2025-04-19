@@ -132,6 +132,7 @@ class Ultimate_Envato_Elements_Updater {
 		$remote_version  = $remote_data['version'];
 		$current_version = ULTIMATE_ENVATO_ELEMENTS_VERSION;
 
+		// Only add update if there's a newer version.
 		if ( version_compare( $current_version, $remote_version, '<' ) ) {
 			$obj              = new stdClass();
 			$obj->slug        = $this->plugin_slug;
@@ -140,6 +141,9 @@ class Ultimate_Envato_Elements_Updater {
 			$obj->url         = "https://github.com/{$this->owner}/{$this->repo}";
 			$obj->package     = "https://github.com/{$this->owner}/{$this->repo}/archive/refs/tags/{$remote_data['tag_name']}.zip";
 			$transient->response[ $this->plugin_basename ] = $obj;
+		} elseif ( isset( $transient->response[ $this->plugin_basename ] ) ) {
+			// If we're on the latest version, make sure to remove any existing update notice.
+			unset( $transient->response[ $this->plugin_basename ] );
 		}
 
 		return $transient;

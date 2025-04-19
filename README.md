@@ -47,6 +47,12 @@ The plugin is designed to work with Envato Elements 2.0.16 and higher. Future co
 
 ## Changelog
 
+### 1.0.3
+
+-   Fixed issue where update notices would appear twice
+-   Improved update checking mechanism
+-   Better handling of version comparison
+
 ### 1.0.2
 
 -   Fixed GitHub updater to properly handle versioned folder names during updates
