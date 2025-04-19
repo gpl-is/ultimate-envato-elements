@@ -47,6 +47,13 @@ The plugin is designed to work with Envato Elements 2.0.16 and higher. Future co
 
 ## Changelog
 
+### 1.0.1
+
+-   Refactored remote version retrieval to return structured data
+-   Updated download links handling
+-   Enhanced changelog formatting with HTML conversion
+-   Updated tested version to WordPress 6.8
+
 ### 1.0.0
 
 -   Initial release
