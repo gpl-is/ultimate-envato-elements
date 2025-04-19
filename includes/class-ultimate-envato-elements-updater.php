@@ -85,7 +85,8 @@ class Ultimate_Envato_Elements_Updater {
 			return $transient;
 		}
 
-		$remote_version  = $this->get_remote_version();
+		$remote_data     = $this->get_remote_version();
+		$remote_version  = $remote_data['version'];
 		$current_version = ULTIMATE_ENVATO_ELEMENTS_VERSION;
 
 		if ( version_compare( $current_version, $remote_version, '<' ) ) {
@@ -94,7 +95,7 @@ class Ultimate_Envato_Elements_Updater {
 			$obj->plugin      = $this->plugin_basename;
 			$obj->new_version = $remote_version;
 			$obj->url         = "https://github.com/{$this->owner}/{$this->repo}";
-			$obj->package     = "https://github.com/{$this->owner}/{$this->repo}/archive/refs/tags/{$remote_version}.zip";
+			$obj->package     = "https://github.com/{$this->owner}/{$this->repo}/archive/refs/tags/{$remote_data['tag_name']}.zip";
 			$transient->response[ $this->plugin_basename ] = $obj;
 		}
 
@@ -119,7 +120,8 @@ class Ultimate_Envato_Elements_Updater {
 			return $result;
 		}
 
-		$remote_version  = $this->get_remote_version();
+		$remote_data     = $this->get_remote_version();
+		$remote_version  = $remote_data['version'];
 		$current_version = ULTIMATE_ENVATO_ELEMENTS_VERSION;
 
 		$obj                 = new stdClass();
@@ -137,7 +139,7 @@ class Ultimate_Envato_Elements_Updater {
 			'description' => 'Access premium Elementor template kits and stock photos without an Envato Elements subscription.',
 			'changelog'   => $this->get_changelog(),
 		);
-		$obj->download_link  = "https://github.com/{$this->owner}/{$this->repo}/archive/refs/tags/{$remote_version}.zip";
+		$obj->download_link  = "https://github.com/{$this->owner}/{$this->repo}/archive/refs/tags/{$remote_data['tag_name']}.zip";
 
 		return $obj;
 	}
@@ -146,23 +148,32 @@ class Ultimate_Envato_Elements_Updater {
 	 * Get the remote version from GitHub.
 	 *
 	 * @since    1.0.0
-	 * @return   string    The remote version.
+	 * @return   array    The remote version data.
 	 */
 	private function get_remote_version() {
 		$response = wp_remote_get( "https://api.github.com/repos/{$this->owner}/{$this->repo}/releases/latest" );
 
 		if ( is_wp_error( $response ) ) {
-			return ULTIMATE_ENVATO_ELEMENTS_VERSION;
+			return array(
+				'version'  => ULTIMATE_ENVATO_ELEMENTS_VERSION,
+				'tag_name' => 'v' . ULTIMATE_ENVATO_ELEMENTS_VERSION,
+			);
 		}
 
 		$body = wp_remote_retrieve_body( $response );
 		$data = json_decode( $body );
 
 		if ( ! isset( $data->tag_name ) ) {
-			return ULTIMATE_ENVATO_ELEMENTS_VERSION;
+			return array(
+				'version'  => ULTIMATE_ENVATO_ELEMENTS_VERSION,
+				'tag_name' => 'v' . ULTIMATE_ENVATO_ELEMENTS_VERSION,
+			);
 		}
 
-		return $data->tag_name;
+		return array(
+			'version'  => ltrim( $data->tag_name, 'v' ),
+			'tag_name' => $data->tag_name,
+		);
 	}
 
 	/**
