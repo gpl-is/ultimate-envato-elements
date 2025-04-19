@@ -1,0 +1,190 @@
+<?php
+/**
+ * GitHub Updater for Ultimate Envato Elements
+ *
+ * @link       https://gpl.is
+ * @since      1.0.0
+ *
+ * @package    Ultimate_Envato_Elements
+ * @subpackage Ultimate_Envato_Elements/includes
+ */
+
+/**
+ * GitHub Updater class.
+ *
+ * Handles checking for updates from GitHub and updating the plugin.
+ *
+ * @since      1.0.0
+ * @package    Ultimate_Envato_Elements
+ * @subpackage Ultimate_Envato_Elements/includes
+ * @author     GPL.IS <hi@gpl.is>
+ */
+class Ultimate_Envato_Elements_Updater {
+
+	/**
+	 * The GitHub repository owner.
+	 *
+	 * @since    1.0.0
+	 * @access   private
+	 * @var      string    $owner    The GitHub repository owner.
+	 */
+	private $owner;
+
+	/**
+	 * The GitHub repository name.
+	 *
+	 * @since    1.0.0
+	 * @access   private
+	 * @var      string    $repo    The GitHub repository name.
+	 */
+	private $repo;
+
+	/**
+	 * The plugin slug.
+	 *
+	 * @since    1.0.0
+	 * @access   private
+	 * @var      string    $plugin_slug    The plugin slug.
+	 */
+	private $plugin_slug;
+
+	/**
+	 * The plugin basename.
+	 *
+	 * @since    1.0.0
+	 * @access   private
+	 * @var      string    $plugin_basename    The plugin basename.
+	 */
+	private $plugin_basename;
+
+	/**
+	 * Initialize the class and set its properties.
+	 *
+	 * @since    1.0.0
+	 */
+	public function __construct() {
+		$this->owner           = 'gpl-is';
+		$this->repo            = 'ultimate-envato-elements';
+		$this->plugin_slug     = 'ultimate-envato-elements';
+		$this->plugin_basename = plugin_basename( dirname( __DIR__ ) . '/ultimate-envato-elements.php' );
+
+		// Add update checker.
+		add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'check_for_updates' ) );
+		add_filter( 'plugins_api', array( $this, 'plugin_info' ), 20, 3 );
+	}
+
+	/**
+	 * Check for updates from GitHub.
+	 *
+	 * @since    1.0.0
+	 * @param    object $transient    The transient object.
+	 * @return   object               The modified transient object.
+	 */
+	public function check_for_updates( $transient ) {
+		if ( empty( $transient->checked ) ) {
+			return $transient;
+		}
+
+		$remote_version  = $this->get_remote_version();
+		$current_version = ULTIMATE_ENVATO_ELEMENTS_VERSION;
+
+		if ( version_compare( $current_version, $remote_version, '<' ) ) {
+			$obj              = new stdClass();
+			$obj->slug        = $this->plugin_slug;
+			$obj->plugin      = $this->plugin_basename;
+			$obj->new_version = $remote_version;
+			$obj->url         = "https://github.com/{$this->owner}/{$this->repo}";
+			$obj->package     = "https://github.com/{$this->owner}/{$this->repo}/archive/refs/tags/{$remote_version}.zip";
+			$transient->response[ $this->plugin_basename ] = $obj;
+		}
+
+		return $transient;
+	}
+
+	/**
+	 * Get plugin information from GitHub.
+	 *
+	 * @since    1.0.0
+	 * @param    bool|object $result   False or object.
+	 * @param    string      $action   The action.
+	 * @param    object      $args     The arguments.
+	 * @return   object                The plugin information.
+	 */
+	public function plugin_info( $result, $action, $args ) {
+		if ( 'plugin_information' !== $action ) {
+			return $result;
+		}
+
+		if ( $args->slug !== $this->plugin_slug ) {
+			return $result;
+		}
+
+		$remote_version  = $this->get_remote_version();
+		$current_version = ULTIMATE_ENVATO_ELEMENTS_VERSION;
+
+		$obj                 = new stdClass();
+		$obj->slug           = $this->plugin_slug;
+		$obj->plugin_name    = 'Ultimate Envato Elements';
+		$obj->name           = 'Ultimate Envato Elements';
+		$obj->version        = $remote_version;
+		$obj->last_updated   = gmdate( 'Y-m-d' );
+		$obj->requires       = '6.0';
+		$obj->tested         = '6.4';
+		$obj->author         = '<a href="https://gpl.is">GPL.IS</a>';
+		$obj->author_profile = 'https://gpl.is';
+		$obj->homepage       = 'https://gpl.is';
+		$obj->sections       = array(
+			'description' => 'Access premium Elementor template kits and stock photos without an Envato Elements subscription.',
+			'changelog'   => $this->get_changelog(),
+		);
+		$obj->download_link  = "https://github.com/{$this->owner}/{$this->repo}/archive/refs/tags/{$remote_version}.zip";
+
+		return $obj;
+	}
+
+	/**
+	 * Get the remote version from GitHub.
+	 *
+	 * @since    1.0.0
+	 * @return   string    The remote version.
+	 */
+	private function get_remote_version() {
+		$response = wp_remote_get( "https://api.github.com/repos/{$this->owner}/{$this->repo}/releases/latest" );
+
+		if ( is_wp_error( $response ) ) {
+			return ULTIMATE_ENVATO_ELEMENTS_VERSION;
+		}
+
+		$body = wp_remote_retrieve_body( $response );
+		$data = json_decode( $body );
+
+		if ( ! isset( $data->tag_name ) ) {
+			return ULTIMATE_ENVATO_ELEMENTS_VERSION;
+		}
+
+		return $data->tag_name;
+	}
+
+	/**
+	 * Get the changelog from GitHub.
+	 *
+	 * @since    1.0.0
+	 * @return   string    The changelog.
+	 */
+	private function get_changelog() {
+		$response = wp_remote_get( "https://api.github.com/repos/{$this->owner}/{$this->repo}/releases/latest" );
+
+		if ( is_wp_error( $response ) ) {
+			return '';
+		}
+
+		$body = wp_remote_retrieve_body( $response );
+		$data = json_decode( $body );
+
+		if ( ! isset( $data->body ) ) {
+			return '';
+		}
+
+		return $data->body;
+	}
+}
