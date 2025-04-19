@@ -129,7 +129,7 @@ class Ultimate_Envato_Elements_Updater {
 		$obj->version        = $remote_version;
 		$obj->last_updated   = gmdate( 'Y-m-d' );
 		$obj->requires       = '6.0';
-		$obj->tested         = '6.4';
+		$obj->tested         = '6.8';
 		$obj->author         = '<a href="https://gpl.is">GPL.IS</a>';
 		$obj->author_profile = 'https://gpl.is';
 		$obj->homepage       = 'https://gpl.is';
