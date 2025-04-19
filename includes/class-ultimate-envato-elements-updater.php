@@ -63,14 +63,57 @@ class Ultimate_Envato_Elements_Updater {
 	 * @since    1.0.0
 	 */
 	public function __construct() {
-		$this->owner           = 'gpl-is';
-		$this->repo            = 'ultimate-envato-elements';
-		$this->plugin_slug     = 'ultimate-envato-elements';
-		$this->plugin_basename = plugin_basename( dirname( __DIR__ ) . '/ultimate-envato-elements.php' );
+		$this->owner       = 'gpl-is';
+		$this->repo        = 'ultimate-envato-elements';
+		$this->plugin_slug = 'ultimate-envato-elements';
+
+		// Get the current plugin directory name.
+		$plugin_dir            = basename( dirname( __DIR__ ) );
+		$this->plugin_basename = $plugin_dir . '/ultimate-envato-elements.php';
 
 		// Add update checker.
 		add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'check_for_updates' ) );
 		add_filter( 'plugins_api', array( $this, 'plugin_info' ), 20, 3 );
+		add_filter( 'upgrader_source_selection', array( $this, 'rename_github_folder' ), 10, 4 );
+	}
+
+	/**
+	 * Rename the GitHub folder to match the expected plugin folder name.
+	 *
+	 * @since    1.0.0
+	 * @param    string $source        The source folder.
+	 * @param    string $remote_source The remote source.
+	 * @param    object $upgrader      The upgrader object.
+	 * @param    array  $hook_extra    Extra arguments.
+	 * @return   string                The modified source folder.
+	 */
+	public function rename_github_folder( $source, $remote_source, $upgrader, $hook_extra ) {
+		global $wp_filesystem;
+
+		// Check if this is our plugin.
+		if ( isset( $hook_extra['plugin'] ) && $hook_extra['plugin'] === $this->plugin_basename ) {
+			$new_source = trailingslashit( $remote_source ) . 'ultimate-envato-elements/';
+
+			// Create the new directory.
+			$wp_filesystem->mkdir( $new_source );
+
+			// Move all files from the versioned folder to the new folder.
+			$old_source = trailingslashit( $source );
+			$files      = $wp_filesystem->dirlist( $old_source );
+
+			if ( $files ) {
+				foreach ( $files as $file ) {
+					$wp_filesystem->move( $old_source . $file['name'], $new_source . $file['name'], true );
+				}
+			}
+
+			// Remove the old directory.
+			$wp_filesystem->delete( $old_source, true );
+
+			return $new_source;
+		}
+
+		return $source;
 	}
 
 	/**
@@ -205,8 +248,9 @@ class Ultimate_Envato_Elements_Updater {
 
 		foreach ( $sections as $section ) {
 			// Convert headers.
-			$section = preg_replace( '/^#\s+(.*)$/m', '<h2>$1</h2>', $section );
-			$section = preg_replace( '/^##\s+(.*)$/m', '<h3>$1</h3>', $section );
+			$section = preg_replace( '/^#\s+(.*)$/m', '<h1>$1</h1>', $section );
+			$section = preg_replace( '/^##\s+(.*)$/m', '<h2>$1</h2>', $section );
+			$section = preg_replace( '/^###\s+(.*)$/m', '<h3>$1</h3>', $section );
 
 			// Convert lists.
 			$section = preg_replace( '/^\s*-\s+(.*)$/m', '<li>$1</li>', $section );

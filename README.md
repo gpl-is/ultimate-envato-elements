@@ -47,6 +47,11 @@ The plugin is designed to work with Envato Elements 2.0.16 and higher. Future co
 
 ## Changelog
 
+### 1.0.2
+
+-   Fixed GitHub updater to properly handle versioned folder names during updates
+-   Improved plugin update process to maintain consistent folder structure
+
 ### 1.0.1
 
 -   Refactored remote version retrieval to return structured data
