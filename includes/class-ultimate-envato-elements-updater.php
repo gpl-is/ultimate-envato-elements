@@ -76,8 +76,8 @@ class Ultimate_Envato_Elements_Updater {
 		add_filter( 'plugins_api', array( $this, 'plugin_info' ), 20, 3 );
 		add_filter( 'upgrader_source_selection', array( $this, 'rename_github_folder' ), 10, 4 );
 
-		// Clear update info after plugin update is complete.
-		add_action( 'upgrader_process_complete', array( $this, 'clear_update_info' ), 10, 2 );
+		// Clear update info when plugin is activated.
+		add_action( 'activated_plugin', array( $this, 'clear_update_info_on_activation' ), 10, 2 );
 	}
 
 	/**
@@ -279,21 +279,26 @@ class Ultimate_Envato_Elements_Updater {
 	}
 
 	/**
-	 * Clear update information from transient after update completion.
+	 * Clear update information when plugin is activated.
 	 *
-	 * @since    1.0.4
-	 * @param    object $upgrader_object The upgrader object.
-	 * @param    array  $options         The update options.
+	 * @since    1.0.5
+	 * @param    string $plugin       Path to the plugin file relative to the plugins directory.
+	 * @param    bool   $network_wide Whether to enable the plugin for all sites in the network or just the current site.
 	 */
-	public function clear_update_info( $upgrader_object, $options ) {
-		if ( 'update' === $options['action'] && 'plugin' === $options['type'] ) {
+	public function clear_update_info_on_activation( $plugin, $network_wide ) {
+		if ( $plugin === $this->plugin_basename ) {
 			$update_plugins = get_site_transient( 'update_plugins' );
 
-			// Check if our plugin is in the update list and remove it from the response.
+			// Remove from both response and checked arrays.
 			if ( isset( $update_plugins->response[ $this->plugin_basename ] ) ) {
 				unset( $update_plugins->response[ $this->plugin_basename ] );
-				set_site_transient( 'update_plugins', $update_plugins );
 			}
+
+			if ( isset( $update_plugins->checked[ $this->plugin_basename ] ) ) {
+				unset( $update_plugins->checked[ $this->plugin_basename ] );
+			}
+
+			set_site_transient( 'update_plugins', $update_plugins );
 		}
 	}
 }
