@@ -47,6 +47,10 @@ The plugin is designed to work with Envato Elements 2.0.16 and higher. Future co
 
 ## Changelog
 
+### 1.1.0
+
+-   Switched to a more reliable plugin update checker
+
 ### 1.0.5
 
 -   Fixed update notification persistence after plugin updates

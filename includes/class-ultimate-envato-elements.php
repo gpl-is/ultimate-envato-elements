@@ -94,7 +94,6 @@ class Ultimate_Envato_Elements {
 	private function load_dependencies() {
 		require_once plugin_dir_path( __DIR__ ) . 'includes/class-ultimate-envato-elements-loader.php';
 		require_once plugin_dir_path( __DIR__ ) . 'includes/class-ultimate-envato-elements-i18n.php';
-		require_once plugin_dir_path( __DIR__ ) . 'includes/class-ultimate-envato-elements-updater.php';
 		require_once plugin_dir_path( __DIR__ ) . 'admin/class-ultimate-envato-elements-admin.php';
 
 		$this->loader = new Ultimate_Envato_Elements_Loader();
@@ -130,9 +129,6 @@ class Ultimate_Envato_Elements {
 		$this->loader->add_action( 'admin_init', $plugin_admin, 'modify_envato_elements_options', 999 );
 
 		$this->loader->add_filter( 'pre_http_request', $plugin_admin, 'modify_envato_api_request', 10, 3 );
-
-		// Initialize the updater.
-		new Ultimate_Envato_Elements_Updater();
 	}
 
 	/**

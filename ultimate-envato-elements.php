@@ -14,7 +14,7 @@
  * Plugin Name:       Ultimate Envato Elements
  * Plugin URI:        https://gpl.is
  * Description:       Access premium Elementor template kits and stock photos without an Envato Elements subscription. Seamlessly integrate professional templates and high-quality images into your WordPress site. Browse, preview, and import assets directly from your dashboard to elevate your website's design.
- * Version:           1.0.5
+ * Version:           1.1.0
  * Author:            GPL.IS
  * Author URI:        https://gpl.is/
  * License:           GPL-2.0+
@@ -33,7 +33,19 @@ if ( ! defined( 'WPINC' ) ) {
  * Start at version 1.0.0 and use SemVer - https://semver.org
  * Rename this for your plugin and update it as you release new versions.
  */
-define( 'ULTIMATE_ENVATO_ELEMENTS_VERSION', '1.0.5' );
+define( 'ULTIMATE_ENVATO_ELEMENTS_VERSION', '1.1.0' );
+
+/**
+ * Plugin Update Checker
+ */
+require plugin_dir_path( __FILE__ ) . 'includes/plugin-update-checker/plugin-update-checker.php';
+use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
+
+$update_checker = PucFactory::buildUpdateChecker(
+	'https://github.com/gplis/ultimate-envato-elements/',
+	__FILE__,
+	'ultimate-envato-elements'
+);
 
 /**
  * The core plugin class that is used to define internationalization,
